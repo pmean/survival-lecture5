@@ -1,0 +1,30 @@
+---
+title: "weibull-simulation5"
+author: "Steve Simon"
+date: "October 19, 2018"
+output: html_document
+---
+
+This program shows the bare bones approach to simulation.
+This file does not need any special libraries other than the ones listed below. Many of the data sets in this program use data from Hosmer, Lemeshow, and May. I made one minor change, however, which was to force all the variable names to lower case.
+
+```{r load-libraries}
+library(broom)
+library(dplyr)
+library(ggplot2)
+library(magrittr)
+library(survival)
+library(tidyr)
+```
+
+```{r generate}
+time <- rweibull(25, shape=2, scale=2.8)
+print(time)
+```
+
+
+Save everything for possible later re-use.
+
+```{r save-everything}
+save.image("../../data/weibull-simulation5.RData")
+```

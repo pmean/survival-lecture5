@@ -4,8 +4,8 @@
 
 ** preliminaries **;
 
-%let xpath=/folders/myfolders;
-%let path=c:/Users/simons/Documents/SASUniversityEdition/myfolders;
+%let path=/folders/myfolders;
+%let xpath=c:/Users/simons/Documents/SASUniversityEdition/myfolders;
 
 ods pdf file="&path/survival-lecture5/sas/class5a.pdf";
 
@@ -94,21 +94,31 @@ data exp_km;
 	s_exp="Exponential"
 run;
 
-data myattrmap;
+data color_map;
 length linecolor $ 9;
 input ID $ value $ linecolor $;
 datalines;
-myid  exp pink
-myid  km  green
+dist  exp red
+dist  km  green
 ;
 run;
 
 proc sgplot
-    dattrmap=myattrmap
+    dattrmap=color_map
     data=exp_km;
-  step x=time_yrs y=s_km / justify=right;
-  series x=time_yrs y=s_exp / attrid=myid group=model;
+  step x=time_yrs y=s_km / justify=right attrid=dist group=model;
+  series x=time_yrs y=s_exp / attrid=dist group=model;
   yaxis values=(0 to 1 by 0.25);
+  title1 "Comparison of survival functions";
+run;
+
+proc sgplot
+    dattrmap=color_map
+    data=exp_km;
+  step x=time_yrs y=LAMBDA_km / justify=right attrid=dist group=model;
+  series x=time_yrs y=LAMBDA_exp / attrid=dist group=model;
+  yaxis values=(0 to 1 by 0.25);
+  title1 "Comparison of cumulative hazards";
 run;
 
 ods pdf close;
