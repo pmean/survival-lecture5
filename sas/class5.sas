@@ -1,4 +1,4 @@
-* class5a.sas
+* class5.sas
   written by Steve Simon
   May 15, 2018;
 
