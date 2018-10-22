@@ -9,6 +9,8 @@ output:
 
 Lecture 5. Parametric models. Parametric models provide an alternative analysis to the Cox proportional hazards model. You’ll compare the hazard function for various popular survival distributions and understand the advantages and disadvantages of a parametric approach to survival. You’ll fit parametric models and interpret the coefficients.
 
+NOte: This file is an in progress attempt to automate the slide production for this class. It is not final or complete and won't be for a while.
+
 ```{r load-libraries, echo=FALSE}
 options(width=50)
 library(knitr)

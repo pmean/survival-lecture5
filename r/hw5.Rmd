@@ -1,11 +1,11 @@
 ---
-title: "homework answers 5"
+title: "hw5"
 author: "Steve Simon"
 date: "May 27, 2018"
 output: html_document
 ---
 
-This file does not need any special libraries other than the ones listed below. Many of the data sets in this program use data from Hosmer, Lemeshow, and May. I made one minor change, however, which was to force all the variable names to lower case.
+This program uses R to answer the homework questions to module 5.
 
 ```{r load-libraries}
 library(broom)
