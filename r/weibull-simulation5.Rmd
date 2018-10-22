@@ -6,7 +6,6 @@ output: html_document
 ---
 
 This program shows the bare bones approach to simulation.
-This file does not need any special libraries other than the ones listed below. Many of the data sets in this program use data from Hosmer, Lemeshow, and May. I made one minor change, however, which was to force all the variable names to lower case.
 
 ```{r load-libraries}
 library(broom)
@@ -17,11 +16,54 @@ library(survival)
 library(tidyr)
 ```
 
+Here's a hypothetical scenario. You collect data on 50 patients in each of two groups (total of 100 patients). In the both groups, you think that the distribution of survival times follows a Weibull distribution with shape parameter 1.2 (implying a slightly increasing hazard over time). The scale parameters for the two groups are 2 and 5, respectively, implying a decelleration of time in the second group (fewer events). With this sized difference, what would your power be?
+
+You have to account for censoring, of course. There are two ways that an observation could be censored. Either the event occurs after the maximum follow-up time of 5 years, or the patients drop out early. The dropout process is an exponential distribution with a rate of 0.25.
+
 ```{r generate}
-time <- rweibull(25, shape=2, scale=2.8)
-print(time)
+n1 <- 50
+n2 <- 50
+n_reps <- 1000
+gp <- rep(rep(0:1, c(n1, n2)), n_reps)
+rp <- rep(1:n_reps, each=n1+n2)
+event_time <- 
+  rweibull(n_reps*(n1+n2), shape=1.2, scale=2+3*gp)
+dropout_time <- rexp(n_reps*(n1+n2), rate=0.25)
+time <- pmin(event_time, dropout_time, 5)
+censor_at_5 <- event_time > 5 & dropout_time > 5
+early_dropout <- dropout_time < event_time & event_time <=5
+mean(censor_at_5)
+mean(early_dropout)
+cens <- as.numeric(!censor_at_5 & !early_dropout)
+df <- data.frame(time, cens, gp, rp)
+event_counts <- tapply(df$cens, list(df$rp, df$gp), sum)
+head(event_counts, 20)
 ```
 
+Run the analyses.
+
+```{r run, error=TRUE}
+output <- NULL
+save(df, file="tst1.RData")
+for (i in 1:n_reps) {
+  sb <- filter(df, rp==i)
+  surv_data <- Surv(sb$time, sb$cens)
+  m1 <- sum(sb$cens==1 & sb$gp==0)
+  m2 <- sum(sb$cens==1 & sb$gp==1)
+  weibull_model <- 
+    survreg(surv_data~gp, 
+      data=sb, dist="weibull")
+  if (weibull_model$iter==30) {next}
+  weibull_model %>%
+    tidy %>%
+    filter(term=="gp") %>%
+    select(term, estimate, p.value) %>%
+    bind_rows(output) -> output
+}
+n_reps - dim(output)[1] # replications with no events
+head(output, n=20)
+mean(output$p.value < 0.05)
+```
 
 Save everything for possible later re-use.
 

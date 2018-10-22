@@ -314,7 +314,7 @@ $(document).ready(function () {
 </div>
 
 
-<p>This program shows the bare bones approach to simulation. This file does not need any special libraries other than the ones listed below. Many of the data sets in this program use data from Hosmer, Lemeshow, and May. I made one minor change, however, which was to force all the variable names to lower case.</p>
+<p>This program shows the bare bones approach to simulation.</p>
 <pre class="r"><code>library(broom)
 library(dplyr)</code></pre>
 <pre><code>## 
@@ -334,12 +334,92 @@ library(tidyr)</code></pre>
 <pre><code>## The following object is masked from 'package:magrittr':
 ## 
 ##     extract</code></pre>
-<pre class="r"><code>time &lt;- rweibull(25, shape=2, scale=2.8)
-print(time)</code></pre>
-<pre><code>##  [1] 1.8420960 3.4705538 5.4019923 5.2338197 2.7192790 3.6621251 5.0999721
-##  [8] 0.6404168 1.2706204 3.4892758 4.7009017 0.4549877 2.0928719 3.0810481
-## [15] 4.1400610 1.0770399 5.7385536 0.7419647 3.2645458 2.1773898 2.6928339
-## [22] 2.7144384 2.0861210 1.4933469 1.1343456</code></pre>
+<p>Here’s a hypothetical scenario. You collect data on 50 patients in each of two groups (total of 100 patients). In the both groups, you think that the distribution of survival times follows a Weibull distribution with shape parameter 1.2 (implying a slightly increasing hazard over time). The scale parameters for the two groups are 2 and 5, respectively, implying a decelleration of time in the second group (fewer events). With this sized difference, what would your power be?</p>
+<p>You have to account for censoring, of course. There are two ways that an observation could be censored. Either the event occurs after the maximum follow-up time of 5 years, or the patients drop out early. The dropout process is an exponential distribution with a rate of 0.25.</p>
+<pre class="r"><code>n1 &lt;- 50
+n2 &lt;- 50
+n_reps &lt;- 1000
+gp &lt;- rep(rep(0:1, c(n1, n2)), n_reps)
+rp &lt;- rep(1:n_reps, each=n1+n2)
+event_time &lt;- 
+  rweibull(n_reps*(n1+n2), shape=1.2, scale=2+3*gp)
+dropout_time &lt;- rexp(n_reps*(n1+n2), rate=0.25)
+time &lt;- pmin(event_time, dropout_time, 5)
+censor_at_5 &lt;- event_time &gt; 5 &amp; dropout_time &gt; 5
+early_dropout &lt;- dropout_time &lt; event_time &amp; event_time &lt;=5
+mean(censor_at_5)</code></pre>
+<pre><code>## [1] 0.05867</code></pre>
+<pre class="r"><code>mean(early_dropout)</code></pre>
+<pre><code>## [1] 0.27491</code></pre>
+<pre class="r"><code>cens &lt;- as.numeric(!censor_at_5 &amp; !early_dropout)
+df &lt;- data.frame(time, cens, gp, rp)
+event_counts &lt;- tapply(df$cens, list(df$rp, df$gp), sum)
+head(event_counts, 20)</code></pre>
+<pre><code>##     0  1
+## 1  38 30
+## 2  34 29
+## 3  32 24
+## 4  32 30
+## 5  31 29
+## 6  33 32
+## 7  35 28
+## 8  31 30
+## 9  32 33
+## 10 39 35
+## 11 36 33
+## 12 39 39
+## 13 40 31
+## 14 36 33
+## 15 32 33
+## 16 31 36
+## 17 32 30
+## 18 38 30
+## 19 35 29
+## 20 32 36</code></pre>
+<p>Run the analyses.</p>
+<pre class="r"><code>output &lt;- NULL
+save(df, file=&quot;tst1.RData&quot;)
+for (i in 1:n_reps) {
+  sb &lt;- filter(df, rp==i)
+  surv_data &lt;- Surv(sb$time, sb$cens)
+  m1 &lt;- sum(sb$cens==1 &amp; sb$gp==0)
+  m2 &lt;- sum(sb$cens==1 &amp; sb$gp==1)
+  weibull_model &lt;- 
+    survreg(surv_data~gp, 
+      data=sb, dist=&quot;weibull&quot;)
+  if (weibull_model$iter==30) {next}
+  weibull_model %&gt;%
+    tidy %&gt;%
+    filter(term==&quot;gp&quot;) %&gt;%
+    select(term, estimate, p.value) %&gt;%
+    bind_rows(output) -&gt; output
+}
+n_reps - dim(output)[1] # replications with no events</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>head(output, n=20)</code></pre>
+<pre><code>##    term  estimate      p.value
+## 1    gp 0.7019409 1.878913e-03
+## 2    gp 0.4338516 3.694998e-02
+## 3    gp 0.5083126 4.652914e-03
+## 4    gp 0.3596243 9.953015e-02
+## 5    gp 0.5034109 2.469148e-02
+## 6    gp 0.5318798 1.177398e-02
+## 7    gp 0.4921955 1.401753e-02
+## 8    gp 0.5324708 1.179655e-02
+## 9    gp 0.3215956 1.263504e-01
+## 10   gp 0.4315778 6.472378e-02
+## 11   gp 0.5388219 2.929562e-03
+## 12   gp 0.5451957 3.068431e-03
+## 13   gp 0.4305198 3.588457e-02
+## 14   gp 0.4439657 5.961502e-02
+## 15   gp 0.6284397 4.046144e-04
+## 16   gp 0.5763837 1.182977e-03
+## 17   gp 0.7065622 1.092734e-05
+## 18   gp 0.7943565 6.101479e-06
+## 19   gp 0.4625073 3.435556e-03
+## 20   gp 0.4801508 8.978922e-03</code></pre>
+<pre class="r"><code>mean(output$p.value &lt; 0.05)</code></pre>
+<pre><code>## [1] 0.724</code></pre>
 <p>Save everything for possible later re-use.</p>
 <pre class="r"><code>save.image(&quot;../../data/weibull-simulation5.RData&quot;)</code></pre>
 
