@@ -31,7 +31,15 @@ $S(t,k,\theta) = e^{-(\frac{t}{\theta})^k}$
 
 In most setting, k called the shape parameter and theta is called the scale parameter.
 
-If k > 1, the Weibull distribution has an increasing hazard rate. If k < 1, the Weibull distribution has a decreasing hazard rate.
+In an accelerated time model, I mistakenly said that k is labeled as the scale parameter. That was close, but not quite accurate.
+
+## Relationship between k and hazard for the Weibull distribution
+
+* k > 1, increasing hazard rate. 
+
+* k < 1, decreasing hazard rate.
+
+* k = 1, constant hazard rate (exponential distribution)
 
 ## Solid line is Weibull with k=2
 
@@ -63,6 +71,42 @@ $e^{\beta_0+\beta_1X}$
 which would give you a survival function of
 
 $S(t,k,\beta_0,\beta_1) = e^{-(\frac{t}{e^{\beta_0+\beta_1X}})^k}$ 
+
+## R graph of Weibull survival
+
+![Graph of survival curves showing a decreasing hazard rate](../images/weibull_graph_r.png)
+
+## R table of Weibull fit
+
+![Table of Weibull model fit](../images/weibull_table_r.png)
+
+## The graph and table don't seem to agree
+
+The graph clearly shows a rapid decline early (relative to an exponential fit) and a slower decline later. This is a decreasing hazard rate, which should be consistent with k < 1.
+
+The table, however, shows a value of k much larger than 1.
+
+## SAS graph of Weibull survival
+
+![Graph of survival curves showing a decreasing hazard rate](../images/weibull_graph_sas.png)
+
+## SAS table of Weibull fit
+
+![Table of Weibull model fit](../images/weibull_table_sas.png)
+
+## SAS is consistent with R, inconsistent with my faulty interpretation
+
+The survival curve in SAS implies the same pattern associated with a decreasing hazard rate.
+
+The table in SAS shows scale of 1.3655, which is the same as R. SAS introduces two new estimates to further confuse things.
+
+## The correct interpretation
+
+The scale parameter in a Weibull accelerated time model is not k, it is 1/k. So the accelerated time model for the Weibull distribution is
+
+$S(t,\sigma,\beta_0,\beta_1) = e^{-(\frac{t}{e^{\beta_0+\beta_1X}})^{\frac{1}{\sigma}}$ 
+
+
 
 
 
