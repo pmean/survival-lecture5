@@ -25,11 +25,11 @@ library(tidyr, warn.conflicts=FALSE, quietly=TRUE)
 
 The Weibull density and survival function
 
-$f(t,k,\theta) = \frac{k}{\theta}(\frac{t}{\theta})^{k-1}e^{-t^k}$;
+$f(t,k,\theta) = \frac{k}{\theta}(\frac{t}{\theta})^{k-1}e^{-t^k}$
 
 $S(t,k,\theta) = e^{-(\frac{t}{\theta})^k}$ 
 
-In most setting, k called the shape parameter and theta is called the scale parameter.
+In most settings, k called the shape parameter and theta is called the scale parameter.
 
 In an accelerated time model, I mistakenly said that k is labeled as the scale parameter. That was close, but not quite accurate.
 
@@ -94,7 +94,7 @@ The table, however, shows a value of k much larger than 1.
 
 ![Table of Weibull model fit](../images/weibull_table_sas.png)
 
-## SAS is consistent with R, inconsistent with my faulty interpretation
+## SAS is consistent with R
 
 The survival curve in SAS implies the same pattern associated with a decreasing hazard rate.
 
@@ -102,11 +102,20 @@ The table in SAS shows scale of 1.3655, which is the same as R. SAS introduces t
 
 ## The correct interpretation
 
-The scale parameter in a Weibull accelerated time model is not k, it is 1/k. So the accelerated time model for the Weibull distribution is
+The scale parameter in a Weibull accelerated time model is not k, it is $\sigma$=1/k.  
 
-$S(t,\sigma,\beta_0,\beta_1) = e^{-(\frac{t}{e^{\beta_0+\beta_1X}})^{\frac{1}{\sigma}}$ 
+This allows an alternate formulation of the Weibull accelerated time model
 
+$ln(T) = \beta_0+\beta_1 X + \sigma \epsilon$
 
+where $\epsilon$ has a log-Weibull distribution (aka an extreme value distribution, a Gumbel distribution).
 
+## What are those two extra values in the SAS code?
 
+![Annotated table of Weibull model fit](../images/annotated_weibull_table_sas.png)
 
+## Conclusions
+
+There are a lot of different ways to parameterize the Weibull regression model.
+
+My mistake was not to RTFM. See pages 80-81 in Paul Allison's book or section 8.3 of Hosmer, Lemeshow, and May for more details.
