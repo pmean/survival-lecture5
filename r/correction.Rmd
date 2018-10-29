@@ -29,9 +29,11 @@ $f(t,k,\theta) = \frac{k}{\theta}(\frac{t}{\theta})^{k-1}e^{-t^k}$
 
 $S(t,k,\theta) = e^{-(\frac{t}{\theta})^k}$ 
 
-In most settings, k called the shape parameter and theta is called the scale parameter.
+In most settings, k called the shape parameter and $\theta$ is called the scale parameter. In an accelerated time model, the term "scale parameter" is used differently, and I was careless in how I described this change.
 
-In an accelerated time model, I mistakenly said that k is labeled as the scale parameter. That was close, but not quite accurate.
+## How Wikipedia presents the Weibull distribution
+
+![Excerpt from Wikipedia page](../images/weibull_wikipedia.png)
 
 ## Relationship between k and hazard for the Weibull distribution
 
@@ -58,10 +60,6 @@ plot(t, 1-pweibull(t, shape=0.5), type="l", ylim=c(0,1))
 lines(t, 1-pweibull(t, shape=1), lty="dotted")
 ```
 
-## How Wikipedia presents the Weibull distribution
-
-![Excerpt from Wikipedia page](../images/weibull_wikipedia.png)
-
 ## The Weibull accelerated time model
 
 Although I did not present the Weibull accelerated time model directly, you can infer that it replaces the parameter $\theta$ with 
@@ -84,7 +82,7 @@ $S(t,k,\beta_0,\beta_1) = e^{-(\frac{t}{e^{\beta_0+\beta_1X}})^k}$
 
 The graph clearly shows a rapid decline early (relative to an exponential fit) and a slower decline later. This is a decreasing hazard rate, which should be consistent with k < 1.
 
-The table, however, shows a value of k much larger than 1.
+The table, however, shows a value of "k" much larger than 1.
 
 ## SAS graph of Weibull survival
 
@@ -113,6 +111,20 @@ where $\epsilon$ has a log-Weibull distribution (aka an extreme value distributi
 ## What are those two extra values in the SAS code?
 
 ![Annotated table of Weibull model fit](../images/annotated_weibull_table_sas.png)
+
+## The two extra SAS parameters
+
+If you use the "traditional" form of the Weibull distribution
+
+$f(t,k,\theta) = \frac{k}{\theta}(\frac{t}{\theta})^{k-1}e^{-t^k}$
+
+$S(t,k,\theta) = e^{-(\frac{t}{\theta})^k}$ 
+
+then SAS is telling you that
+
+$\theta=9.6566$
+
+$k=0.7323$
 
 ## Conclusions
 
